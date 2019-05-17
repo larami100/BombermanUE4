@@ -38,6 +38,12 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+
+	void OnSpawnBomb();
+	void OnRestart();
+
+public:
+	virtual void BeginPlay() override;
 };
 
 

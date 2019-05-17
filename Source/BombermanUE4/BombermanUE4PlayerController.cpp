@@ -2,7 +2,8 @@
 
 #include "BombermanUE4PlayerController.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "Runtime/Engine/Classes/Components/DecalComponent.h"
+#include "Components/DecalComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "BombermanUE4Character.h"
 #include "Engine/World.h"
@@ -24,6 +25,12 @@ void ABombermanUE4PlayerController::PlayerTick(float DeltaTime)
 	}
 }
 
+void ABombermanUE4PlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	SetInputMode(FInputModeGameAndUI());
+}
+
 void ABombermanUE4PlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -37,6 +44,12 @@ void ABombermanUE4PlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ABombermanUE4PlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ABombermanUE4PlayerController::OnResetVR);
+
+	// Spawn a bomb if space bar or right mouse button is pressed
+	InputComponent->BindAction("SpawnBomb", IE_Pressed, this, &ABombermanUE4PlayerController::OnSpawnBomb);
+
+	// Restart the game pressing the R key only if the game is paused
+	InputComponent->BindAction("Restart", IE_Pressed, this, &ABombermanUE4PlayerController::OnRestart).bExecuteWhenPaused = true;
 }
 
 void ABombermanUE4PlayerController::OnResetVR()
@@ -109,4 +122,18 @@ void ABombermanUE4PlayerController::OnSetDestinationReleased()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+void ABombermanUE4PlayerController::OnSpawnBomb()
+{
+	if (ABombermanUE4Character* MyPawn = Cast<ABombermanUE4Character>(GetPawn()))
+	{
+		MyPawn->SpawnBomb();
+	}
+}
+
+void ABombermanUE4PlayerController::OnRestart()
+{
+	// Reopen the level at the beginning
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
