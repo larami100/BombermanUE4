@@ -43,23 +43,23 @@ public:
 	UPROPERTY()
 	UMaterial* StoredMaterialUndestructable;
 
-	// Wall position in the map
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Position;
-
 	// Sets default values for this actor's properties
 	AWall();
 
 	void SetWallType(EWallTypesEnum WallTypesEnum);
 
 	// Set wall material based on the wall type
-	void SetMaterial(EWallTypesEnum WallTypesEnum);
+	void SetMaterial(EWallTypesEnum WallTypesEnumCreated);
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	// Called every frame. Turned off to improve performance
+	// virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	// virtual void BeginPlay() override;
+
+	// Called when the game ends or when destroy
+	virtual void Destroyed() override;
+
 
 };
