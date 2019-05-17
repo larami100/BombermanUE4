@@ -6,11 +6,14 @@
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "WallsGenerator.h"
+#include "Bomb.h"
 
 ABombermanUE4Character::ABombermanUE4Character()
 {
@@ -55,6 +58,41 @@ ABombermanUE4Character::ABombermanUE4Character()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	// Give one bomb to the player at the beginning of the game
+	BombsCounter = 1;
+}
+
+// When the player presses the Space bar or right click mouse, this method is going to be called
+void ABombermanUE4Character::SpawnBomb()
+{
+	// If the bomb blueprint is assigned ti BombToSpawn variable in UE4 editor and the user has at least one bomb
+	if (BombToSpawn && BombsCounter)
+	{
+		// Prepare the bomb to be spawned at player's position
+		ABomb* BombSpawned = GetWorld()->SpawnActorDeferred<ABomb>(ABomb::StaticClass(), GetTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		if (BombSpawned)
+		{
+			// Decrease the player's bombs counter
+			BombsCounter--;
+			
+			// Update bombs counter in screen 
+			((ABombermanUE4GameMode*)GetWorld()->GetAuthGameMode())->UpdateTimeAndBombs(BombsCounter);
+			
+			// If the user has the Longer Bomb Blast Power-Up
+			if (LongerExplosions)
+			{
+				// Decrease the Longer Blast Bombs that the player has 
+				LongerExplosions--;
+
+				// Mark that the bomb to be spawned has a longer blast.
+				BombSpawned->bDoesHaveLongerExplosion = true;
+			}
+
+			// Spawn the bomb
+			UGameplayStatics::FinishSpawningActor(BombSpawned, GetTransform());
+		}
+	}
 }
 
 void ABombermanUE4Character::Tick(float DeltaSeconds)
