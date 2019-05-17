@@ -2,29 +2,30 @@
 
 
 #include "Wall.h"
-#include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
-#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
-#include "Runtime/Engine/Classes/Materials/MaterialInstanceDynamic.h"
+#include "Components/StaticMeshComponent.h"
+#include "CoreUObject/Public/UObject/ConstructorHelpers.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "PowerUpPickUp.h"
 
 // Sets default values
 AWall::AWall()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// PrimaryActorTick.bCanEverTick = true;
 
 	StoredMaterialDestructable = nullptr;
 	StoredMaterialUndestructable = nullptr;
 
 	WallMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMesh"));
-	WallMeshComponent->SetupAttachment(RootComponent);
+	RootComponent = WallMeshComponent;
 
 	// Set basic cube form mesh asset to the wall
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/1M_Cube_Chamfer.1M_Cube_Chamfer'"));
 	if (CubeMeshAsset.Succeeded())	
 	{
-		PrimaryActorTick.bCanEverTick = true;
 		WallMeshComponent->SetStaticMesh(CubeMeshAsset.Object);
 		SetActorEnableCollision(true);
+		WallMeshComponent->SetMobility(EComponentMobility::Static);
 
 		//Double the cube asset original size
 		WallMeshComponent->SetRelativeScale3D(FVector(2.f, 2.f, 4.f));
@@ -44,10 +45,22 @@ AWall::AWall()
 }
 
 
-void AWall::SetMaterial(EWallTypesEnum WallTypesEnum)
+void AWall::Destroyed()
+{
+	//After the wall is destroyed, spawn a pickup if the wall has one inside it
+	if (WallTypesEnum != EWallTypesEnum::WE_Destructable && WallTypesEnum != EWallTypesEnum::WE_Undestructable && WallTypesEnum != EWallTypesEnum::WE_None)
+	{
+		FActorSpawnParameters SpawnInfo;
+		GetWorld()->SpawnActor<APowerUpPickUp>(GetActorLocation(), GetActorRotation(), SpawnInfo);
+		Super::Destroyed();
+	}
+}
+
+
+void AWall::SetMaterial(EWallTypesEnum WallTypesEnumCreated)
 {
 	//Based on the type of wall, the material is dynamically assigned
-	switch (WallTypesEnum)
+	switch (WallTypesEnumCreated)
 	{
 		case EWallTypesEnum::WE_Destructable:
 		case EWallTypesEnum::WE_FasterRunSpeed:
@@ -81,17 +94,5 @@ void AWall::SetMaterial(EWallTypesEnum WallTypesEnum)
 void AWall::SetWallType(EWallTypesEnum WallType)
 {
 	WallTypesEnum = WallType;
-}
-
-// Called when the game starts or when spawned
-void AWall::BeginPlay()
-{	
-}
-
-// Called every frame
-void AWall::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
