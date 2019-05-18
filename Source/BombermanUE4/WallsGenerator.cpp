@@ -109,7 +109,7 @@ void AWallsGenerator::LogBoard()
 		{
 			const UEnum* WallTypesEnumX = FindObject<UEnum>(ANY_PACKAGE, TEXT("EWallTypesEnum"));
 			
-			UE_LOG(LogTemp, Warning, TEXT("Board in %d, %d is %d")  //SetWeaponState called on weapon %s with state %s (Role %s)")
+			UE_LOG(LogTemp, Warning, TEXT("Board in %d, %d is %d")
 				, Row
 				, Column
 				, static_cast<int>(Board.Rows[Row].Columns[Column]));
@@ -121,9 +121,7 @@ void AWallsGenerator::LogBoard()
 // Check in the logic board if the position indicated by Row and Column has a destructable object in order to destroy it in the board and world map 
 bool AWallsGenerator::DestroyActorInBoard(const int32 Row, const int32 Column)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Err aqui: %d, %d"), Row, Column)
-
-	LogBoard();
+	// LogBoard();
 
     //Condition to check valid board positions in longer bomb blasts
 	if(Row >=0 && Row < TotalRows && Column >=0 && Column < TotalColumns)

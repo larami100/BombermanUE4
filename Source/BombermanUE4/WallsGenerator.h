@@ -47,6 +47,8 @@ struct FBoardGrid
 	// Total rows and columns that the map will have
 	int32 TotalRows;
 	int32 TotalColumns;
+
+	// Initial position where is located the the top-left board square in the game board
 	float InitialPositionX;
 	float InitialPositionY;
 
@@ -143,7 +145,6 @@ struct FBoardGrid
 
 	FVector2D ChangeMapPositionToLogicBoardPosition(const FVector ActorLocation)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Actr Lcatin in map: %.2f, %.2f"), ActorLocation.X, ActorLocation.Y)
 		int32 Row = -1, Column = -1;
 		for (float X = InitialPositionX; X > ActorLocation.X; X -= 200, ++Row);
 		for (float Y = InitialPositionY; Y < ActorLocation.Y; Y += 200, ++Column);
@@ -152,8 +153,6 @@ struct FBoardGrid
 		Column = Column < 0 ? 0 : Column;
 		Row = Row >= TotalRows ? (TotalRows-1) : Row;
 		Column = Column >= TotalColumns ? (TotalColumns-1) : Column;
-
-		UE_LOG(LogTemp, Warning, TEXT("Actr Lcatin in bard: %d, %d"), Row, Column)
 
 		return FVector2D(Row, Column);
 	}
